@@ -1,0 +1,28 @@
+--cpu Cortex-M0
+"main\startup_stm32f030x8.o"
+"main\i2c-lcd.o"
+"main\dht.o"
+"main\delay_timer.o"
+"main\main.o"
+"main\stm32f0xx_it.o"
+"main\stm32f0xx_hal_msp.o"
+"main\stm32f0xx_hal_i2c.o"
+"main\stm32f0xx_hal_i2c_ex.o"
+"main\stm32f0xx_hal_rcc.o"
+"main\stm32f0xx_hal_rcc_ex.o"
+"main\stm32f0xx_hal.o"
+"main\stm32f0xx_hal_gpio.o"
+"main\stm32f0xx_hal_dma.o"
+"main\stm32f0xx_hal_cortex.o"
+"main\stm32f0xx_hal_pwr.o"
+"main\stm32f0xx_hal_pwr_ex.o"
+"main\stm32f0xx_hal_flash.o"
+"main\stm32f0xx_hal_flash_ex.o"
+"main\stm32f0xx_hal_exti.o"
+"main\stm32f0xx_hal_tim.o"
+"main\stm32f0xx_hal_tim_ex.o"
+"main\system_stm32f0xx.o"
+--strict --scatter "main\main.sct"
+--summary_stderr --info summarysizes --map --load_addr_map_info --xref --callgraph --symbols
+--info sizes --info totals --info unused --info veneers
+--list "main.map" -o main\main.axf
