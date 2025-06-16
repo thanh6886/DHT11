@@ -82,7 +82,7 @@ uint16_t SUM, RH, TEMP;
 float Temperature = 0;
 float Humidity = 0;
 uint8_t Presence = 0;
-float setTemp = 0, SET_OK = 0;
+float setTemp = 30, SET_OK = 30;
 
 
 void Set_Pin_Output ()
@@ -144,16 +144,15 @@ uint8_t DHT11_Read (void)
 	return i;
 }
 
-#define DEBOUNCE_DELAY      200
+#define DEBOUNCE_DELAY      50
 static uint32_t lastDebounceTime_UP   = 0;
 static uint32_t lastDebounceTime_DOWN = 0;
 static uint32_t lastDebounceTime_BACK = 0;
 static uint32_t lastDebounceTime_OK   = 0;
-
+ static uint8_t relayState = 0 ,relayState_1 = 0 ,relayState_2 = 0, relayState_3 = 0;
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
     uint32_t currentTick = HAL_GetTick();
-		 static uint8_t relayState = 0 ,relayState_1 = 0 ,relayState_2 = 0, relayState_3 = 0;
 			
     if (GPIO_Pin == UP_Pin)
     {
@@ -172,7 +171,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
         if ((currentTick - lastDebounceTime_DOWN) >= DEBOUNCE_DELAY)
         {
             lastDebounceTime_DOWN = currentTick;
-         					 relayState_1 = !relayState_1;
+         		relayState_1 = !relayState_1;
             if (relayState_1)
             {
                 setTemp-=1;
@@ -184,6 +183,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
         if ((currentTick - lastDebounceTime_BACK) >= DEBOUNCE_DELAY)
         {
             lastDebounceTime_BACK = currentTick;
+					 relayState_3 = !relayState_3;
 					 if (relayState_3)
             {
                 HAL_GPIO_WritePin(GPIOA, RELAY_1_Pin|RELAY_2_Pin, GPIO_PIN_SET);
@@ -203,7 +203,11 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
             if (relayState_2)
             {
                 SET_OK = setTemp;
+							 HAL_GPIO_WritePin(GPIOA, RELAY_1_Pin|RELAY_2_Pin, GPIO_PIN_SET);
             }
+												else{
+							 HAL_GPIO_WritePin(GPIOA, RELAY_1_Pin|RELAY_2_Pin, GPIO_PIN_RESET);
+						}
         }
     }
 }
@@ -225,8 +229,6 @@ int main(void)
 {
 
   HAL_Init();
-  HAL_Init();
-
   SystemClock_Config();
   MX_GPIO_Init();
   MX_I2C1_Init();
@@ -234,8 +236,8 @@ int main(void)
   /* USER CODE BEGIN 2 */
 	DELAY_TIM_Init(&htim3);
 	HAL_GPIO_WritePin(GPIOA, DHT11_Pin|LED_Pin, GPIO_PIN_SET);
+	HAL_GPIO_WritePin(GPIOA, RELAY_1_Pin|RELAY_2_Pin, GPIO_PIN_RESET);
 	lcd_init();	
-	lcd_clear();
 	sprintf(temp, "Nhiet do: %0.1f C", Temperature);
 	sprintf(hump, "Do am: %0.1f%%", Humidity);		
 	lcd_put_cur(0, 0);
@@ -273,8 +275,8 @@ if(uiTimeLed == 0)
 				Temperature = (float) TEMP;
 				Humidity = (float) RH; 
 				
-			sprintf(temp, "TEMP:%0.1fC-SET:%f", Temperature, setTemp); 
-			sprintf(hump, "HUMP: %0.1f%%", Humidity); 
+			sprintf(temp, "TEMP:%0.1fC||SET:", Temperature); 
+			sprintf(hump, "HUMP:%0.1f%%||%f", Humidity,setTemp); 
 			lcd_put_cur(0, 0); 
 			lcd_send_string(temp); 
 			lcd_put_cur(1, 0); 
